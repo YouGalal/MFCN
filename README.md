@@ -10,6 +10,7 @@ Multi fragment phenomenon (MFP) is a phenomenon in which some breaks occur in th
 Each model can be used Model-Agnostic, but it is a code that applies FCDenseNet with the best performance among the current popular segmentation models through experiments.    
 MFCN consists of a total of three stages. The first stage is the conventional method, the second stage is the Patch-wise PICC segmentation network, and the third stage is the Line reconnection network that can directly solve the MFP.
 
+![Figure2](https://user-images.githubusercontent.com/79253022/148063562-edbe9208-259b-4e59-807b-c9d59a9e20b2.jpg)
 
 ## Environments
 the setting of the virtual environment we used is described as pytorch_MFCN.yml
