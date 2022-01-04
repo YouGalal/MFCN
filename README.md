@@ -7,6 +7,8 @@ Detailed instructions for testing the image are as follows.
 
 MFCN is Multi-stage Networks that improves PICC tip detection performance through multi-fragment phenomenon improvement.   
 Multi fragment phenomenon (MFP) is a phenomenon in which some breaks occur in the predicted line when segmenting the sparse PICC area, making it difficult to accurately detect the catheter tip.   
+
+## MFCN Network
 Each model can be used Model-Agnostic, but it is a code that applies FCDenseNet with the best performance among the current popular segmentation models through experiments.    
 MFCN consists of a total of three stages. The first stage is the conventional method, the second stage is the Patch-wise PICC segmentation network, and the third stage is the Line reconnection network that can directly solve the MFP.
 
