@@ -10,3 +10,8 @@ Detailed instructions for testing the image are as follows.
 122
 
 22
+
+## Environments
+the setting of the virtual environment we used is described as pytorch_MFCN.yml
+
+## segmentation
