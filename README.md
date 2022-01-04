@@ -38,3 +38,6 @@ python.sh ## fixed
 ```
 python.sh ## fixed
 ```
+
+## Result
+if you run three things sequentially, you will see that a `~/output/output_FCDenseNetmodel_`
