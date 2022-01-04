@@ -23,6 +23,18 @@ The RANZCR dataset can be downloaded from
 <https://www.kaggle.com/c/ranzcr-clip-catheter-line-classification/data>
 
 ## Evaluation
+
+#### Conventional method
+```
+python.sh ## fixed
+```
+
+#### Patch-wise PICC segmentation network
+```
+python.sh ## fixed
+```
+
+#### Line reconnection network
 ```
 python.sh ## fixed
 ```
