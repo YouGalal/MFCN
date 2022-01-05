@@ -17,6 +17,7 @@ MFCN consists of a total of three stages. The first stage is the conventional me
 
 ## Evaluation
 #### Environments
+Currently, all code examples are assuming distributed launch with 2 multi GPUs.   
 the setting of the virtual environment we used is described as pytorch_MFCN.yml
 
 #### PICC Datasets
@@ -29,23 +30,28 @@ segmentation model pre-trained weight file put it in `~/MFCN_SMC/checkpoint`.
 Download segmentation_checkpoint file in [here](https://drive.google.com/drive/folders/1p3RWyCzoQq8b4PWbgN_YNSNAqtSejcT-?usp=sharing)   
 
 #### Conventional method
-Please run "segmentation/codes/inference.py".
+To evaluate First stage, run this command:
 ```
-python.sh ## fixed
+python stage1_conventional_model.py
 ```
 
 #### Patch-wise PICC segmentation network
+To evaluate Second stage, run this command:
 ```
-python.sh ## fixed
+python stage2_patch_wise.py
 ```
 
 #### Line reconnection network
+To evaluate First stage, run this command:
 ```
-python.sh ## fixed
+python stage3_line_reconnection.py
 ```
+
 
 ## Result
-if you run three things sequentially, you will see that a `~/MFCN_SMC/output/output_FCDenseNetmodel_`
+If you run three things sequentially, You can check the final result in `~/MFCN_SMC/output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/FCDenseNetthird_output/FCDenseNet/First_connected_component`.    
 
-![Figure14](https://user-images.githubusercontent.com/79253022/148207780-4a2d1fef-a6e0-46f5-a184-0285b0637377.jpg)
+
+The results of the conventional model can be found in `~/MFCN_SMC/output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/First_connected_component`.    
+![Figure13](https://user-images.githubusercontent.com/79253022/148213587-5eb09ed5-c61c-4cf4-b5cc-54dbc85c78c3.jpg)
 
