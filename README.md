@@ -50,7 +50,7 @@ python stage3_line_reconnection.py
 
 ## Result
 
-Our model achieve the following RMSE performance (mm) on:   
+Our model achieve the following RMSE performance (pixels) on:   
 
 |Method|Conventional model|     **MFCN**     |
 |:---:|:---:|:---:|
