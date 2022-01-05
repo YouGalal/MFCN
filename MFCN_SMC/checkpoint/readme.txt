@@ -1,0 +1,1 @@
+download segmentation pre-trained weight
