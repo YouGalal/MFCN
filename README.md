@@ -53,10 +53,10 @@ python stage3_line_reconnection.py
 Our model achieve the following RMSE performance (mm) on:   
 
 |Method|Conventional model|     MFCN     |
-|------|---|----------|
-|FCDenseNet|95.90|43.06|
-|U-Net|263.70|71.90|
-|Attention U-Net|187.98|56.64|
+|:---:|:---:|:---:|
+|FCDenseNet|95.90||43.06||
+|U-Net|263.70||71.90||
+|Attention U-Net|187.98||56.64||
 
 If you run three things sequentially, You can check the final result in `~/MFCN_SMC/output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/FCDenseNetthird_output/FCDenseNet/First_connected_component`.    
 
