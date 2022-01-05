@@ -18,7 +18,7 @@ MFCN consists of a total of three stages. The first stage is the conventional me
 ## Evaluation
 #### Environments
 Currently, all code examples are assuming distributed launch with 2 multi GPUs.   
-the setting of the virtual environment we used is described as pytorch_MFCN.yml
+the setting of the virtual environment we used is described as `~/pytorch_MFCN.yml`
 
 #### PICC Datasets
 We measured the experimental results using the RANZCR dataset, and the example image is in the `~/MFCN_SMC/model_input`.   
