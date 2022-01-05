@@ -14,17 +14,24 @@ MFCN consists of a total of three stages. The first stage is the conventional me
 
 ![Figure2](https://user-images.githubusercontent.com/79253022/148063562-edbe9208-259b-4e59-807b-c9d59a9e20b2.jpg)
 
-## Environments
+## Implementation Detail
+### Environments
 the setting of the virtual environment we used is described as pytorch_MFCN.yml
 
-## PICC Datasets
+### PICC Datasets
 We measured the experimental results using the RANZCR dataset, and the example image is in the `~/model_input`.   
 The RANZCR dataset can be downloaded from
 <https://www.kaggle.com/c/ranzcr-clip-catheter-line-classification/data>
 
+
 ## Evaluation
 
+#### pre-trained weight
+Download segmentation_checkpoint file in [here](https://drive.google.com/drive/folders/1p3RWyCzoQq8b4PWbgN_YNSNAqtSejcT-?usp=sharing)
+Put the pre-trained weight file in the "~/checkpoint" folder 
+
 #### Conventional method
+to create a split mask. After that, receive the segmentation model pre-trained weight file above and put it in "segmentation/segmentation_checkpoint". Please run "segmentation/codes/inference.py".
 ```
 python.sh ## fixed
 ```
