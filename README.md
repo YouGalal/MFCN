@@ -20,12 +20,12 @@ MFCN consists of a total of three stages. The first stage is the conventional me
 the setting of the virtual environment we used is described as pytorch_MFCN.yml
 
 #### PICC Datasets
-We measured the experimental results using the RANZCR dataset, and the example image is in the `~/model_input`.   
+We measured the experimental results using the RANZCR dataset, and the example image is in the `~/MFCN_SMC/model_input`.   
 The RANZCR dataset can be downloaded from
 <https://www.kaggle.com/c/ranzcr-clip-catheter-line-classification/data>
 
 #### pre-trained weight
-segmentation model pre-trained weight file put it in `~/checkpoint`.   
+segmentation model pre-trained weight file put it in `~/MFCN_SMC/checkpoint`.   
 Download segmentation_checkpoint file in [here](https://drive.google.com/drive/folders/1p3RWyCzoQq8b4PWbgN_YNSNAqtSejcT-?usp=sharing)   
 
 #### Conventional method
@@ -45,7 +45,7 @@ python.sh ## fixed
 ```
 
 ## Result
-if you run three things sequentially, you will see that a `~/output/output_FCDenseNetmodel_`
+if you run three things sequentially, you will see that a `~/MFCN_SMC/output/output_FCDenseNetmodel_`
 
 ![Figure14](https://user-images.githubusercontent.com/79253022/148207780-4a2d1fef-a6e0-46f5-a184-0285b0637377.jpg)
 
