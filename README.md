@@ -52,7 +52,7 @@ python stage3_line_reconnection.py
 
 Our model achieve the following RMSE performance (mm) on:   
 
-|Method|Conventional model|MFCN|
+|Method|Conventional model|     MFCN     |
 |------|---|---|
 |FCDenseNet|95.90|43.06|
 |U-Net|263.70|71.90|
