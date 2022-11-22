@@ -1,7 +1,7 @@
 ## Automated Precision Localization of Peripherally Inserted Central Catheter Tip through Model-Agnostic Multi-Stage Networks
 
 We release MFCN evaluation code.    
-Collaborators: Subin Park, Kyung-su Kim
+Collaborators: Subin Park, Kyungsu Kim
 
 Detailed instructions for testing the image are as follows.   
 
