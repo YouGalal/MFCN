@@ -22,7 +22,7 @@ class MyTrainDataset(Dataset):
 
     def __init__(self, image_path, sampler):
 
-        self.sample_arr = glob.glob(str(image_path) +"/**/*")
+        self.sample_arr = glob.glob(str(image_path) + "/**/*.jpg", recursive=True)
         self.sample_arr.sort()
         self.sample_arr = [self.sample_arr[x] for x in sampler]
         self.data_len = len(self.sample_arr)
@@ -31,7 +31,7 @@ class MyTrainDataset(Dataset):
         self.images = []
         self.masks = []
 
-        if not os.path.isdir(image_path):
+        if not os.path.isdir(image_path):   
             raise RuntimeError('Dataset not found or corrupted. DIR : ' + image_path)
 
         for sample in self.sample_arr:
@@ -66,8 +66,11 @@ class MyTrainDataset(Dataset):
         images = np.ma.filled(images, 0)
 
         # masks
+        # ✅ Load grayscale masks
         masks = np.asarray(
-            [np.asarray(Image.open(x).resize((header.resize_width, header.resize_height))) for x in self.masks[index]])
+            [np.asarray(Image.open(x).convert('L').resize((header.resize_width, header.resize_height)))
+            for x in self.masks[index]])
+
 
         # mask scaling
         masks = masks / 255
@@ -96,8 +99,8 @@ class MyTestDataset(Dataset):
         # filter out nodule cases
         sample_nn = []
         for i in self.sample_arr:
-            if (i.find('case') > 0):#                    ?????/?//
-                sample_nn.append(i)
+            if (i.find('case') > 0):
+                sample_nn.append(i)  # <- keep all files ######################################################## modified ##################################################################
         self.sample_arr = sample_nn
 
         self.data_len = len(self.sample_arr)
@@ -290,7 +293,7 @@ def pre_processing(images, flag_jsrt=10):
 
     # histogram
     num_out_bit = 1 << header.rescale_bit
-    num_bin = images.max() + 1
+    num_bin = max(1, int(images.max()) + 1)  # FIXED HERE!
 
     # histogram specification, gamma correction
     hist, bins = np.histogram(images.flatten(), num_bin, [0, num_bin])

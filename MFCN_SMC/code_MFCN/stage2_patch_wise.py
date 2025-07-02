@@ -60,7 +60,7 @@ def main():
 
 
     # Load model
-    model_dir = header.dir_checkpoint + 'FCDenseNetmodel__RANZCR_100_Crop_100_512v9.1.pth' # --main whole
+    model_dir = header.dir_checkpoint + 'FCDenseNet_Stage2_epoch2.pth' # --main whole
 
     if os.path.isfile(model_dir):
         print('\n>> Load model - %s' % (model_dir))

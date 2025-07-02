@@ -38,7 +38,7 @@ def main():
     flag_eval_JI = True  # True #False # calculate JI
     flag_save_PNG = True  # preprocessR2U_Neted, mask
     connected_patch = True
-    softmax_thresh_value = 0.01
+    softmax_thresh_value = 0.2 ### 0.01 ###
 
 
 
@@ -61,14 +61,14 @@ def main():
             net = nn.DataParallel(net)
 #FCDenseNet U_Net R2U_Net AttU_Net R2AttU_Net
     # Load model
-    model_dir = header.dir_checkpoint + str(header.First_net_string[network_number]) + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png
+    model_dir = header.dir_checkpoint + "FCDenseNet_epoch35.pth" # + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png ################################################## modified ##################################
 
     print(model_dir)
     if os.path.isfile(model_dir):
         print('\n>> Load model - %s' % (model_dir))
-        checkpoint = torch.load(model_dir)
+        checkpoint = torch.load(model_dir, map_location=torch.device('cpu'))
         net.load_state_dict(checkpoint['model_state_dict'])
-        test_sampler = checkpoint['test_sampler']
+        test_sampler = None ################################################# modified #######################################################
         print("  >>> Epoch : %d" % (checkpoint['epoch']))
         # print("  >>> JI Best : %.3f" % (checkpoint['ji_best']))
     else:
@@ -145,12 +145,13 @@ def main():
                     dir_case_id = dir_case_id.replace('/Normal', '')
                     mydataset.create_folder(save_dir)
                     # '''
+                    os.makedirs(os.path.dirname(save_dir + dir_case_id + '_mask.jpg'), exist_ok=True) ############################################### modified ##############################################
                     Image.fromarray(post_output[0] * 255).convert('L').save(save_dir + dir_case_id + '_mask.jpg')
                     Image.fromarray(image_original.astype('uint8')).convert('L').save(
                         save_dir + dir_case_id + '_image.jpg')
 
                     save_dir_th = save_dir.replace('/Whole',
-                                           '/thresh')
+                                                    '/thresh')
                     mydataset.create_folder(save_dir_th)
 
 
@@ -158,6 +159,7 @@ def main():
 
                     save_file_th = cv2.resize(save_file_th, original_size, interpolation=cv2.INTER_NEAREST)
 
+                    os.makedirs(os.path.dirname(save_dir_th + dir_case_id + '_thresh.jpg'), exist_ok=True) ############################################### modified ##############################################
                     Image.fromarray(save_file_th * 255).convert('L').save(
                         save_dir_th + dir_case_id + '_thresh.jpg')
 
@@ -195,7 +197,7 @@ def connected_component(inp, oup):
     OUTPUT_FOLDER = oup
 
     # Get a list of all the captcha images we need to process
-    captcha_image_files = glob.glob(os.path.join(CAPTCHA_IMAGE_FOLDER, "*_thresh.jpg"))
+    captcha_image_files = glob.glob(os.path.join(CAPTCHA_IMAGE_FOLDER, "**/*_thresh.jpg"), recursive=True) ### important fix ###
 
     # loop over the image paths
     for (i, captcha_image_file) in enumerate(captcha_image_files):
@@ -215,6 +217,7 @@ def connected_component(inp, oup):
         check_value_list = []
         # getting mask with connectComponents
         ret, labels = cv2.connectedComponents(binary)
+
         for label in range(1, ret):
             checkvalue = np.array(labels, dtype=np.uint8)
             checkvalue[labels == label] = 255
@@ -256,6 +259,10 @@ def connected_component(inp, oup):
         filename = os.path.basename(captcha_image_file)
         p = os.path.join(OUTPUT_FOLDER, filename.replace('_thresh', ''))
 
+        if im.sum() == 0:
+            print(f"[INFO] Connected component found nothing for {filename}, writing blank mask.")
+            im = np.zeros_like(im)
+            
         cv2.imwrite(p, im)
 
 
@@ -338,6 +345,10 @@ def post_processing(raw_image, original_size, flag_pseudo=0):
 
     if (flag_pseudo):
         raw_image = cv2.resize(raw_image, net_input_size, interpolation=cv2.INTER_NEAREST)
+
+        # Always ensure single-channel output
+    if raw_image.ndim == 3 and raw_image.shape[2] == 3:
+        raw_image = cv2.cvtColor(raw_image, cv2.COLOR_BGR2GRAY)
 
     return raw_image
 

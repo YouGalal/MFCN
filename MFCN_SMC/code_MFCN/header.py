@@ -70,8 +70,8 @@ First_net_string = ["FCDenseNet"]
 #orig_height = 2048
 #orig_width = 2048
 
-resize_height = 1024
-resize_width = 1024
+resize_height = 512 ### 1024 ###
+resize_width = 512 ### 1024 ###
 
 resize_height_second = 512
 resize_width_second = 512
@@ -79,7 +79,7 @@ resize_width_second = 512
 rescale_bit = 8
 
 # CPU
-num_worker = 2
+num_worker = 0
 
 # Train schedule
 num_batch_train = 1
@@ -92,6 +92,6 @@ train_split = 0.8
 valid_split = 0.92
 
 # Test schedule
-num_batch_test = 8
+num_batch_test = 8 ### 8 ####
 
 filename_model = 'model_' + Whole_Catheter + '_'+ str(epoch_max)+ '_' + str(resize_height) + tag + '.pth'
