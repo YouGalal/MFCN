@@ -61,7 +61,7 @@ def main():
             net = nn.DataParallel(net)
 #FCDenseNet U_Net R2U_Net AttU_Net R2AttU_Net
     # Load model
-    model_dir = header.dir_checkpoint + "FCDenseNet_epoch35.pth" # + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png ################################################## modified ##################################
+    model_dir = header.dir_checkpoint + "FCDenseNet_epoch47.pth" # + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png ################################################## modified ##################################
 
     print(model_dir)
     if os.path.isfile(model_dir):
@@ -118,10 +118,10 @@ def main():
                                                                                 header.net_label[1:])
                 # '''
                 # post processing
-                post_output = [post_processing(outputs_max[k][j].numpy(), original_size) for j in
+                post_output = [post_processing(outputs_max[k][j].cpu().numpy(), original_size) for j in
                                range(1, header.num_masks)]  # exclude background
 
-                post_output_mask = [post_processing(data['masks'][k][j].numpy(), original_size) for j in
+                post_output_mask = [post_processing(data['masks'][k][j].cpu().numpy(), original_size) for j in
                                     range(0, header.num_masks - 1)]  # exclude background
 
                 # jaccard index (JI)
@@ -131,7 +131,7 @@ def main():
                 # '''
 
                 # original image processings
-                save_dir = header.dir_save
+                save_dir = header.dir_save # dir_save = "../output/"
                 mydataset.create_folder(save_dir)
                 image_original = testset.get_original(i * header.num_batch_test + k)
 
@@ -165,14 +165,28 @@ def main():
 
 
     if connected_patch:
-        inp = header.original_dir
+        inp = header.original_dir # "../model_input/" + "input_Catheter"+Data_path+"/test/PICC"
+        inp2 = "../model_input/input_Catheter_Whole_RANZCR/train"
+        inp3 = "../model_input/input_Catheter_Whole_RANZCR/validation"
         oup = save_dir.replace('/Whole',
                                '/First_connected_component')
+        mydataset.create_folder(oup)
+        oup2 = "../model_input/mask_Catheter_Whole_RANZCR/train"
+        mydataset.create_folder(oup)
+        oup3 = "../model_input/mask_Catheter_Whole_RANZCR/validation"
         mydataset.create_folder(oup)
 
         ouput2 = save_dir.replace('/Whole',
                                   '/random_crop')
         mydataset.create_folder(ouput2)
+
+        ouput3 = save_dir.replace('/Whole',
+                                  '/random_crop_train')
+        mydataset.create_folder(ouput3)
+
+        ouput4 = save_dir.replace('/Whole',
+                                  '/random_crop_validation')
+        mydataset.create_folder(ouput4)
 
 
         make_correlation_check(save_dir)
@@ -180,9 +194,15 @@ def main():
 
         connected_component(save_dir_th, oup)
         print("connected component process complete")
-        connedted_component_crop(inp, oup, ouput2)
-        print("Crop process complete")
 
+        connedted_component_crop(inp, oup, ouput2, 200)
+        print("Connected Component Crop process complete")
+
+        connedted_component_crop(inp2, oup2, ouput3, 100)
+        print("Train Data Crop process complete")
+
+        connedted_component_crop(inp3, oup3, ouput4, 100)
+        print("Validation Data Crop process complete")
 
 
 
@@ -193,11 +213,11 @@ def connected_component(inp, oup):
     import cv2
     import glob
     import numpy as np
-    CAPTCHA_IMAGE_FOLDER = inp
+    CAPTCHA_IMAGE_FOLDER = inp # "../model_input/" + "input_Catheter"+Data_path+"/test/PICC"
     OUTPUT_FOLDER = oup
 
     # Get a list of all the captcha images we need to process
-    captcha_image_files = glob.glob(os.path.join(CAPTCHA_IMAGE_FOLDER, "**/*_thresh.jpg"), recursive=True) ### important fix ###
+    captcha_image_files = glob.glob(os.path.join(CAPTCHA_IMAGE_FOLDER, "*_thresh.jpg"), recursive=True) ### important fix ###
 
     # loop over the image paths
     for (i, captcha_image_file) in enumerate(captcha_image_files):
@@ -266,14 +286,14 @@ def connected_component(inp, oup):
         cv2.imwrite(p, im)
 
 
-def connedted_component_crop(input1, input2, ouput1):
+def connedted_component_crop(input1, input2, ouput1, data_number):
     # connected component 이후 crop
     from PIL import Image
     import os
     import numpy as np
 
     Crop_img_size = 512
-    data_number = 200
+    # data_number = 200
 
     inp = input1 + '/'
     inp2 = input2 + '/'

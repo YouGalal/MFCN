@@ -21,6 +21,8 @@ import torch.nn as nn
 import cv2
 import correlation_code
 import os
+import numpy as np
+from collections import OrderedDict
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
@@ -63,18 +65,24 @@ def main():
     model_dir = header.dir_checkpoint + 'FCDenseNet_Stage2_epoch2.pth' # --main whole
 
     if os.path.isfile(model_dir):
-        print('\n>> Load model - %s' % (model_dir))
-        checkpoint = torch.load(model_dir)
-        net.load_state_dict(checkpoint['model_state_dict'])
-        test_sampler = checkpoint['test_sampler']
-        print("  >>> Epoch : %d" % (checkpoint['epoch']))
-        # print("  >>> JI Best : %.3f" % (checkpoint['ji_best']))
+        print(f'\n>> Load model - {model_dir}')
+        checkpoint = torch.load(model_dir, map_location=device)
+
+        state_dict = checkpoint['model_state_dict']
+        new_state_dict = OrderedDict()
+        for k, v in state_dict.items():
+            new_state_dict[k.replace("module.", "")] = v  # strip 'module.' if present
+
+        net.load_state_dict(new_state_dict)
+        print(f"  >>> Loaded Epoch: {checkpoint['epoch']}")
     else:
-        print('[Err] Model does not exist in %s' % (model_dir))
+        print(f'[Err] Model does not exist in {model_dir}')
         exit()
 
-    # network to GPU
     net.to(device)
+    net.eval()
+
+    test_sampler = None
 
     dir_Second_test_path = header.dir_secon_data_root + 'output_inference_segmentation_endtoend' + test_network_name + header.Whole_Catheter + '/First_output/random_crop/data/input_Catheter_' + header.Whole_Catheter
     # loop dataset class
@@ -99,21 +107,24 @@ def main():
 
             # forward
             outputs = net(data['input'].to(device))
-            outputs = torch.argmax(outputs.detach(), dim=1)
+            outputs_sigmoid = torch.sigmoid(outputs)
 
-            # one hot
-            outputs_max = torch.stack([mydataset.one_hot(outputs[k], header.num_masks) for k in range(len(data['input']))])
+            # Apply threshold (e.g., 0.5)
+            binary_masks = (outputs_sigmoid > 0.05).float()
+
+            # print("Sigmoid Output - min:", outputs_sigmoid.min().item(),
+            #        "max:", outputs_sigmoid.max().item(),
+            #        "mean:", outputs_sigmoid.mean().item())
 
             # each case
             for k in range(len(data['input'])):
 
                 # get size and case id
+                binary_mask = binary_masks[k][0].cpu().numpy()
                 original_size, dir_case_id, dir_results = mydataset.get_size_id(k, data['im_size'], data['ids'], header.net_label[1:])
 
-                # post processing
-                post_output = [post_processing(outputs_max[k][j].numpy(), original_size) for j in range(1, header.num_masks)] # exclude background
+                post_output = [post_processing(binary_mask, original_size)]
 
-                # original image processings
                 save_dir = header.dir_save
                 mydataset.create_folder(save_dir)
                 image_original = testset.get_original(i * header.num_batch_test + k)
@@ -186,6 +197,7 @@ def Original_file_make(inp, patch_dir, oup):
                 Count_img[int(filevalue.split('_')[3]):int(filevalue.split('_')[5]),
                 int(filevalue.split('_')[2]):int(filevalue.split('_')[4])] += 1
 
+
         img = img / Count_img
 
         img[img > 90] = 255
@@ -236,13 +248,12 @@ def third_data_make(inp, patch_dir, oup):
                 Count_img[int(filevalue.split('_')[3]):int(filevalue.split('_')[5]),
                 int(filevalue.split('_')[2]):int(filevalue.split('_')[4])] += 1
 
-
         img = img / Count_img
 
-        img[img > 120] = 255
-        img[img <= 120] = 0
+        img[img > 90] = 255
+        img[img <= 90] = 0
 
-        Image.fromarray(img.astype('uint8')).convert('L').save(oup1 + files)
+        Image.fromarray(img.astype('uint8')).convert('L').save(oup1 + files) ### im instead of img ###
         Image.fromarray(img.astype('uint8')).convert('L').save(oup2 + files)
 
 def get_JI(pred_m, gt_m):
@@ -297,4 +308,3 @@ if __name__=='__main__':
 
     for test_network_name in test_network_name_list:
         main()
-

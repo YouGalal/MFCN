@@ -43,7 +43,7 @@ original_dir = dir_data_root + "input_Catheter"+Data_path+"/test/PICC"
 #test_normal_150
 
 # Network
-num_masks = 2
+num_masks = 1
 num_network = 1
 
 test_secon_network_name = "FCDenseNet"
@@ -92,6 +92,6 @@ train_split = 0.8
 valid_split = 0.92
 
 # Test schedule
-num_batch_test = 8 ### 8 ####
+num_batch_test = 2 ### 8 ####
 
 filename_model = 'model_' + Whole_Catheter + '_'+ str(epoch_max)+ '_' + str(resize_height) + tag + '.pth'

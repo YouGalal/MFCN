@@ -369,8 +369,7 @@ def hist_CLAHE(image):
 
 
 def one_hot(x, class_count):
-    return torch.eye(class_count)[:, x]
-
+    return torch.eye(class_count, device=x.device)[:, x]
 
 def create_folder(directory):
     if not os.path.exists(directory):
@@ -423,7 +422,7 @@ class MyTestDataset_512(Dataset):
             self.images.append(sample)
             mask_list = []
             for x in header.dir_mask_path:
-                mask_candidate = image_path.replace('/input_Catheter'+header.Data_path, x) + self.ids[-1] + '.jpg'
+                mask_candidate = image_path.replace('/input_Catheter'+header.Data_path, x) + self.ids[-1] + '.jpg' # Data_path = "_Whole_RANZCR"
                 if (os.path.isfile(mask_candidate)):
                     mask_list.append(mask_candidate)
             self.masks.append(mask_list)
@@ -446,6 +445,7 @@ class MyTestDataset_512(Dataset):
         # resize
         images = np.asarray(Image.fromarray(images).resize((header.resize_width_second, header.resize_height_second)))
 
+        images = images / 255.0 ############# very imp #############
 
         masks = np.asarray(
             [np.asarray(Image.open(x).resize((header.resize_width_second, header.resize_height_second))) for x in self.masks[index]])
@@ -467,3 +467,69 @@ class MyTestDataset_512(Dataset):
         images = pre_processing(images)
 
         return images
+
+class MyTrainDataset_512(Dataset):
+
+    def __init__(self, image_path, sampler):
+
+        self.sample_arr = glob.glob(str(image_path) + "/**/*.jpg", recursive=True)
+        self.sample_arr.sort()
+
+        self.sample_arr = [self.sample_arr[x] for x in sampler]
+        self.data_len = len(self.sample_arr)
+
+        self.ids = []
+        self.images = []
+        self.masks = []
+
+        if not os.path.isdir(image_path):
+            raise RuntimeError('Dataset not found or corrupted. DIR : ' + image_path)
+
+        for sample in self.sample_arr:
+            self.ids.append(sample.replace(image_path, '').replace('.jpg', ''))
+            self.images.append(sample)
+            mask_list = []
+            for x in header.dir_mask_path:
+                mask_candidate = image_path.replace('/input_Catheter' + header.Data_path, x) + self.ids[-1] + '.jpg'
+                if os.path.isfile(mask_candidate):
+                    mask_list.append(mask_candidate)
+            self.masks.append(mask_list)
+
+    def __len__(self):
+        return self.data_len
+
+    def __getitem__(self, index):
+
+        # Load image
+        image = np.asarray(np.array(Image.open(self.images[index]).convert('L'), 'uint8'))
+        original_image_size = np.array(image.shape)
+
+        # Preprocessing
+        image = pre_processing(image).astype('float32')
+
+        # Resize to 512
+        image = np.asarray(Image.fromarray(image).resize((header.resize_width_second, header.resize_height_second)))
+
+        # Load and resize masks
+        masks = np.asarray([
+            np.asarray(Image.open(x).convert('L').resize((header.resize_width_second, header.resize_height_second)))
+            for x in self.masks[index]
+        ])
+
+        # Normalize masks
+        masks = masks / 255
+        background_mask = np.expand_dims(0.5 * np.ones(masks.shape[-2:]), axis=0)
+
+        # Argmax across background + masks
+        masks_cat = np.concatenate((background_mask, masks), axis=0)
+        masks_list = np.argmax(masks_cat, axis=0).astype("uint8")
+
+        return {
+            'input': np.expand_dims(image, 0),
+            'masks': masks_list.astype("int64"),
+            'ids': self.ids[index],
+            'im_size': original_image_size
+        }
+
+    def get_id(self, index):
+        return self.ids[index]
