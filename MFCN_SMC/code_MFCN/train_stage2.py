@@ -8,13 +8,11 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import numpy as np
 import cv2
-import random
 from glob import glob
 import torch.nn.functional as F
 
 import header
 import model
-import mydataset
 
 class PatchDatasetFromFolder(Dataset):
     def __init__(self, image_folder, mask_folder):
@@ -44,46 +42,6 @@ class PatchDatasetFromFolder(Dataset):
             'masks': torch.tensor(mask, dtype=torch.float32)
         }
 
-class FocalTverskyLoss(nn.Module):
-    def __init__(self, alpha=0.3, beta=0.7, gamma=0.75, smooth=1e-6):
-        super(FocalTverskyLoss, self).__init__()
-        self.alpha = alpha
-        self.beta = beta
-        self.gamma = gamma
-        self.smooth = smooth
-
-    def forward(self, logits, targets):
-        probs = torch.sigmoid(logits)
-        targets = targets.type_as(probs)
-
-        TP = (probs * targets).sum(dim=(1, 2, 3))
-        FP = ((1 - targets) * probs).sum(dim=(1, 2, 3))
-        FN = (targets * (1 - probs)).sum(dim=(1, 2, 3))
-
-        tversky_index = (TP + self.smooth) / (TP + self.alpha * FP + self.beta * FN + self.smooth)
-        loss = torch.pow((1 - tversky_index), self.gamma)
-
-        return loss.mean()
-
-class DiceLoss(nn.Module):
-    def __init__(self, smooth=1.0):
-        super(DiceLoss, self).__init__()
-        self.smooth = smooth
-
-    def forward(self, inputs, targets):
-        # Sigmoid activation for logits
-        inputs = torch.sigmoid(inputs)
-
-        # Flatten tensors to [B, -1]
-        inputs = inputs.view(inputs.size(0), -1)
-        targets = targets.view(targets.size(0), -1)
-
-        intersection = (inputs * targets).sum(dim=1)
-        union = inputs.sum(dim=1) + targets.sum(dim=1)
-
-        dice = (2. * intersection + self.smooth) / (union + self.smooth)
-        return 1 - dice.mean()
-
 
 def main():
 
@@ -98,9 +56,6 @@ def main():
 
     val_cxr_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_validation/data/input_Catheter__Whole_RANZCR/PICC' 
     val_mask_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_validation/data/mask_Catheter__Whole_RANZCR/PICC' 
-
-    train_count = len(os.listdir(train_cxr_dir))
-    val_count = len(os.listdir(val_cxr_dir))
 
     train_dataset = PatchDatasetFromFolder(train_cxr_dir, train_mask_dir)
     val_dataset   = PatchDatasetFromFolder(val_cxr_dir, val_mask_dir)
@@ -117,13 +72,6 @@ def main():
     if torch.cuda.device_count() > 1:
         net = nn.DataParallel(net)
 
-    bce_loss = nn.BCEWithLogitsLoss()  # No pos_weight for now
-    dice_loss = DiceLoss()
-
-    def combined_loss(pred, target):
-        return 0.7 * bce_loss(pred, target) + 0.3 * dice_loss(pred, target)
-
-    pos_weight = torch.tensor([5.0], device=device)  # You may need to tune this
     criterion = nn.BCEWithLogitsLoss()
     optimizer = optim.Adam(net.parameters(), lr=header.learning_rate)
 
@@ -161,7 +109,7 @@ def main():
                 for ax in axes:
                	    ax.axis('off')
                 plt.tight_layout()
-                plt.savefig(f'vis_epoch{epoch+1}_batch{i}.png')
+                plt.savefig(f'plots/vis_epoch{epoch+1}_batch{i}.png')
                 plt.close()
 
             loss.backward()
@@ -198,7 +146,7 @@ def main():
             'train_loss': avg_train_loss,
             'val_loss': avg_val_loss
         }
-        ckpt_path = os.path.join(header.dir_checkpoint, f'FCDenseNet_Stage2_epoch{epoch+1}.pth')
+        ckpt_path = os.path.join(header.dir_checkpoint, f'FCDenseNet_Stage3_epoch{epoch+1}.pth')
         torch.save(ckpt, ckpt_path)
         print(f"Saved checkpoint: {ckpt_path}")
 

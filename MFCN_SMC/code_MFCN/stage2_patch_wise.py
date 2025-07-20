@@ -62,7 +62,7 @@ def main():
 
 
     # Load model
-    model_dir = header.dir_checkpoint + 'FCDenseNet_Stage2_epoch2.pth' # --main whole
+    model_dir = header.dir_checkpoint + 'FCDenseNet_Stage2_epoch9.pth' # --main whole
 
     if os.path.isfile(model_dir):
         print(f'\n>> Load model - {model_dir}')
@@ -110,7 +110,7 @@ def main():
             outputs_sigmoid = torch.sigmoid(outputs)
 
             # Apply threshold (e.g., 0.5)
-            binary_masks = (outputs_sigmoid > 0.05).float()
+            binary_masks = (outputs_sigmoid > 0.5).float()
 
             # print("Sigmoid Output - min:", outputs_sigmoid.min().item(),
             #        "max:", outputs_sigmoid.max().item(),
@@ -198,11 +198,12 @@ def Original_file_make(inp, patch_dir, oup):
                 int(filevalue.split('_')[2]):int(filevalue.split('_')[4])] += 1
 
 
-        img = img / Count_img
+        img = img / 255.0
 
-        img[img > 90] = 255
-        img[img <= 90] = 0
+        img[img > 0.5] = 1
+        img[img <= 0.5] = 0
 
+        img = (img * 255).astype('uint8')
         Image.fromarray(img.astype('uint8')).convert('L').save(oup + files)
 
 
@@ -248,10 +249,12 @@ def third_data_make(inp, patch_dir, oup):
                 Count_img[int(filevalue.split('_')[3]):int(filevalue.split('_')[5]),
                 int(filevalue.split('_')[2]):int(filevalue.split('_')[4])] += 1
 
-        img = img / Count_img
+        img = img / 255.0
 
-        img[img > 90] = 255
-        img[img <= 90] = 0
+        img[img > 0.5] = 1
+        img[img <= 0.5] = 0
+
+        img = (img * 255).astype('uint8')
 
         Image.fromarray(img.astype('uint8')).convert('L').save(oup1 + files) ### im instead of img ###
         Image.fromarray(img.astype('uint8')).convert('L').save(oup2 + files)

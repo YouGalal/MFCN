@@ -55,9 +55,9 @@ def main():
         print("GPU COUNT = ", str(torch.cuda.device_count()))
         if torch.cuda.device_count() > 1:
             net = nn.DataParallel(net)
-#FCDenseNet U_Net R2U_Net AttU_Net R2AttU_Net
+    # FCDenseNet U_Net R2U_Net AttU_Net R2AttU_Net
     # Load model
-    model_dir = header.dir_checkpoint + 'FCDenseNetmodel__1024_noise_RANZCR_100_1024v9.1.pth'
+    model_dir = header.dir_checkpoint + 'FCDenseNet_Stage3_epoch50.pth'
 
     print(model_dir)
     if os.path.isfile(model_dir):
