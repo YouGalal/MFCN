@@ -1,4 +1,4 @@
-# train_stage2.py 
+# train_stage2.py
 
 import os
 import torch
@@ -35,7 +35,7 @@ class PatchDatasetFromFolder(Dataset):
 
         img = np.expand_dims(img, axis=0)
 
-        print(f"[Debug] Input shape: {img.shape}, dtype: {img.dtype}, min: {img.min()}, max: {img.max()}")
+        # print(f"[Debug] Input shape: {img.shape}, dtype: {img.dtype}, min: {img.min()}, max: {img.max()}")
 
         return {
             'input': torch.tensor(img, dtype=torch.float32),
@@ -51,11 +51,11 @@ def main():
     print(f"Using device: {device}")
 
     # === Load cropped patches ===
-    train_cxr_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_train/data/input_Catheter__Whole_RANZCR/PICC' 
-    train_mask_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_train/data/mask_Catheter__Whole_RANZCR/PICC' 
+    train_cxr_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_train/data/input_Catheter__Whole_RANZCR/PICC'
+    train_mask_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_train/data/mask_Catheter__Whole_RANZCR/PICC'
 
-    val_cxr_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_validation/data/input_Catheter__Whole_RANZCR/PICC' 
-    val_mask_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_validation/data/mask_Catheter__Whole_RANZCR/PICC' 
+    val_cxr_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_validation/data/input_Catheter__Whole_RANZCR/PICC'
+    val_mask_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_validation/data/mask_Catheter__Whole_RANZCR/PICC'
 
     train_dataset = PatchDatasetFromFolder(train_cxr_dir, train_mask_dir)
     val_dataset   = PatchDatasetFromFolder(val_cxr_dir, val_mask_dir)
@@ -78,7 +78,7 @@ def main():
     for epoch in range(header.epoch_max):
         net.train()
         train_loss = 0.0
-        
+
         print(">>> Starting training loop")
         for i, batch in enumerate(train_loader):
             inputs = batch['input'].float().to(device)
@@ -107,7 +107,7 @@ def main():
                 axes[2].set_title('Predicted Mask')
 
                 for ax in axes:
-               	    ax.axis('off')
+                    ax.axis('off')
                 plt.tight_layout()
                 plt.savefig(f'plots/vis_epoch{epoch+1}_batch{i}.png')
                 plt.close()
@@ -146,7 +146,7 @@ def main():
             'train_loss': avg_train_loss,
             'val_loss': avg_val_loss
         }
-        ckpt_path = os.path.join(header.dir_checkpoint, f'FCDenseNet_Stage3_epoch{epoch+1}.pth')
+        ckpt_path = os.path.join(header.dir_checkpoint, f'FCDenseNet_Stage2_epoch{epoch+1}.pth')
         torch.save(ckpt, ckpt_path)
         print(f"Saved checkpoint: {ckpt_path}")
 

@@ -20,4 +20,4 @@ for i, filename in enumerate(files, start=1):
     os.rename(old_path, new_path)
     print(f"Renamed: {filename} -> {new_filename}")
 
-print("\n✅ Done renaming files.")
+print("\nDone renaming files.")

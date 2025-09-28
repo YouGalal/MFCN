@@ -15,11 +15,9 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 def main():
     print("\nStarting Stage 1 Training (Whole-Image Segmentation)\n")
 
-    # Use GPU if available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # Load Model
     net = header.First_net_model[0]  # e.g., FC-DenseNet
     net = net.to(device)
     if torch.cuda.device_count() > 1:
@@ -71,7 +69,7 @@ def main():
                     print(f"[Epoch {epoch+1}/{header.epoch_max}] Batch {i} Loss: {loss.item():.8f}")
 
             except Exception as e:
-                print(f"❌ ERROR in Batch {i+1}: {e}")
+                print(f" ERROR in Batch {i+1}: {e}")
                 raise
 
 

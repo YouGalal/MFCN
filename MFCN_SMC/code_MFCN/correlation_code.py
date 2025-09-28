@@ -101,8 +101,8 @@ def correlation_Firt_Images(model_inp, original_image, oup):
         img = cv2.imread(os.path.join(model_inp, files), cv2.IMREAD_COLOR)
         img2 = cv2.imread(os.path.join(original_image,'PICC', files.replace('_mask', '')), cv2.IMREAD_COLOR)
 
-        # img, img2 = Image_resize_Size(img, img2, 1024, 1024)
-        img, img2 = Image_resize_Size(img, img2, img.shape[1], img.shape[0])
+        img, img2 = Image_resize_Size(img, img2, 1024, 1024)
+        # img, img2 = Image_resize_Size(img, img2, img.shape[1], img.shape[0])
 
         gray_pred = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray_label = cv2.cvtColor(img2, cv2.COLOR_BGR2GRAY)
@@ -250,7 +250,6 @@ def connected_component_one(image):
     # gray_rgb = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
 
     return im
-
 
 def Image_resize_Size(img, img2, re_width, re_height):
     img = cv2.resize(img, (re_width, re_height))

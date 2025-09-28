@@ -66,7 +66,6 @@ class MyTrainDataset(Dataset):
         images = np.ma.filled(images, 0)
 
         # masks
-        # ✅ Load grayscale masks
         masks = np.asarray(
             [np.asarray(Image.open(x).convert('L').resize((header.resize_width, header.resize_height)))
             for x in self.masks[index]])

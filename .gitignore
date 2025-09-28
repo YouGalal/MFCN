@@ -1,1 +1,5 @@
 *.pth
+MFCN_SMC/output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop/*
+MFCN_SMC/output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_train/*
+MFCN_SMC/output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop_validation/*
+MFCN_SMC/output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/second_output_90/FCDenseNet/patch/*

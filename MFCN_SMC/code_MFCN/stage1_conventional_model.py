@@ -38,7 +38,7 @@ def main():
     flag_eval_JI = True  # True #False # calculate JI
     flag_save_PNG = True  # preprocessR2U_Neted, mask
     connected_patch = True
-    softmax_thresh_value = 0.2 ### 0.01 ###
+    softmax_thresh_value = 0.01 ### 0.01 ###
 
 
 
@@ -61,7 +61,7 @@ def main():
             net = nn.DataParallel(net)
 #FCDenseNet U_Net R2U_Net AttU_Net R2AttU_Net
     # Load model
-    model_dir = header.dir_checkpoint + "FCDenseNet_epoch47.pth" # + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png ################################################## modified ##################################
+    model_dir = header.dir_checkpoint + "FCDenseNet_epoch35.pth" # + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png ################################################## modified ##################################
 
     print(model_dir)
     if os.path.isfile(model_dir):
@@ -116,6 +116,7 @@ def main():
                 # get size and case id
                 original_size, dir_case_id, dir_results = mydataset.get_size_id(k, data['im_size'], data['ids'],
                                                                                 header.net_label[1:])
+
                 # '''
                 # post processing
                 post_output = [post_processing(outputs_max[k][j].cpu().numpy(), original_size) for j in
@@ -130,7 +131,7 @@ def main():
                     ji_test.append(ji)
                 # '''
 
-                # original image processings
+                # original image processing
                 save_dir = header.dir_save # dir_save = "../output/"
                 mydataset.create_folder(save_dir)
                 image_original = testset.get_original(i * header.num_batch_test + k)
@@ -217,7 +218,7 @@ def connected_component(inp, oup):
     OUTPUT_FOLDER = oup
 
     # Get a list of all the captcha images we need to process
-    captcha_image_files = glob.glob(os.path.join(CAPTCHA_IMAGE_FOLDER, "*_thresh.jpg"), recursive=True) ### important fix ###
+    captcha_image_files = glob.glob(os.path.join(CAPTCHA_IMAGE_FOLDER, "**/*_thresh.jpg"), recursive=True) ### important fix ###
 
     # loop over the image paths
     for (i, captcha_image_file) in enumerate(captcha_image_files):
@@ -282,7 +283,7 @@ def connected_component(inp, oup):
         if im.sum() == 0:
             print(f"[INFO] Connected component found nothing for {filename}, writing blank mask.")
             im = np.zeros_like(im)
-            
+
         cv2.imwrite(p, im)
 
 
@@ -365,10 +366,6 @@ def post_processing(raw_image, original_size, flag_pseudo=0):
 
     if (flag_pseudo):
         raw_image = cv2.resize(raw_image, net_input_size, interpolation=cv2.INTER_NEAREST)
-
-        # Always ensure single-channel output
-    if raw_image.ndim == 3 and raw_image.shape[2] == 3:
-        raw_image = cv2.cvtColor(raw_image, cv2.COLOR_BGR2GRAY)
 
     return raw_image
 

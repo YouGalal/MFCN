@@ -22,10 +22,78 @@ import cv2
 import correlation_code
 import os
 import numpy as np
+from glob import glob
 from collections import OrderedDict
 
 os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+
+class UnifiedPatchTestDataset(torch.utils.data.Dataset):
+    def __init__(self, image_root, sampler=None):
+        self.image_root = image_root
+        self.sample_arr = sorted(glob(os.path.join(image_root, '**/*.jpg'), recursive=True))
+
+        # Filter out files that are not patch images (e.g., must contain 'case')
+        self.sample_arr = [p for p in self.sample_arr if 'case' in p]
+        self.data_len = len(self.sample_arr)
+
+        self.ids = []
+        self.images = []
+        self.masks = []
+
+        for sample_path in self.sample_arr:
+            # Track ID
+            rel_id = sample_path.replace(image_root, '').replace('.jpg', '')
+            self.ids.append(rel_id)
+
+            # Track image
+            self.images.append(sample_path)
+
+            # Track corresponding mask
+            mask_list = []
+            for x in header.dir_mask_path:
+                mask_path = image_root.replace('/input_Catheter' + header.Data_path, x) + rel_id + '.jpg'
+                if os.path.isfile(mask_path):
+                    mask_list.append(mask_path)
+
+            if not mask_list:
+                raise FileNotFoundError(f"No corresponding mask found for: {sample_path}")
+            self.masks.append(mask_list)
+
+    def __len__(self):
+        return self.data_len
+
+    def __getitem__(self, index):
+        image_path = self.images[index]
+        img = np.array(Image.open(image_path).convert('L'), dtype=np.uint8)
+
+        # Apply CLAHE
+        img = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8)).apply(img)
+        original_size = img.shape
+        img = img.astype(np.float32) / 255.0
+        img = np.expand_dims(img, axis=0)
+
+        # Load and process corresponding mask
+        mask_path = self.masks[index][0]
+        mask = np.array(Image.open(mask_path).convert('L'), dtype=np.uint8)
+        mask = (mask > 127).astype(np.float32)
+        mask = np.expand_dims(mask, axis=0)
+
+        return {
+            'input': torch.tensor(img, dtype=torch.float32),
+            'masks': torch.tensor(mask, dtype=torch.float32),
+            'ids': self.ids[index],
+            'im_size': np.array(img.shape[1:])  # H, W
+        }
+
+    def get_id(self, index):
+        return self.ids[index]
+
+    def get_original(self, index):
+        img = np.array(Image.open(self.images[index]).convert('L'), dtype=np.uint8)
+        img = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8)).apply(img)
+        return img
+
 
 def main():
 
@@ -80,7 +148,7 @@ def main():
         exit()
 
     net.to(device)
-    net.eval()
+    net.train()
 
     test_sampler = None
 
@@ -89,10 +157,10 @@ def main():
     # Dataset
     print('\n>> Load dataset -', dir_Second_test_path)
 
-    testset = mydataset.MyTestDataset_512(dir_Second_test_path, test_sampler)
+    test_cxr_dir = '../output/output_inference_segmentation_endtoendFCDenseNet_Whole_RANZCR/First_output/random_crop/data/input_Catheter__Whole_RANZCR/PICC'
+    testset = UnifiedPatchTestDataset(test_cxr_dir)
+    testloader = DataLoader(testset, batch_size=header.num_batch_test, shuffle=False, num_workers=num_worker, pin_memory=True)
 
-    testloader = DataLoader(testset, batch_size=header.num_batch_test, shuffle=False, num_workers=num_worker,
-                            pin_memory=True)
     print("  >>> Total # of test sampler : %d" % (len(testset)))
 
     # inference
@@ -100,44 +168,29 @@ def main():
     with torch.no_grad():
 
         # initialize
-        net.eval()
+        net.train()
         ji_test = []
 
         for i, data in enumerate(testloader, 0):
-
-            # forward
             outputs = net(data['input'].to(device))
-            outputs_sigmoid = torch.sigmoid(outputs)
+            outputs = outputs.detach().cpu()
 
-            # Apply threshold (e.g., 0.5)
-            binary_masks = (outputs_sigmoid > 0.5).float()
-
-            # print("Sigmoid Output - min:", outputs_sigmoid.min().item(),
-            #        "max:", outputs_sigmoid.max().item(),
-            #        "mean:", outputs_sigmoid.mean().item())
-
-            # each case
             for k in range(len(data['input'])):
+                prob_map = torch.sigmoid(outputs[k]).squeeze().numpy()
+                pred_mask = (prob_map > 0.5).astype(np.uint8)
+                pred_mask_bin = pred_mask
 
-                # get size and case id
-                binary_mask = binary_masks[k][0].cpu().numpy()
-                original_size, dir_case_id, dir_results = mydataset.get_size_id(k, data['im_size'], data['ids'], header.net_label[1:])
+                original_size, dir_case_id, _ = mydataset.get_size_id(k, data['im_size'], data['ids'], header.net_label[1:])
+                resized_mask = cv2.resize(pred_mask_bin, original_size, interpolation=cv2.INTER_NEAREST)
 
-                post_output = [post_processing(binary_mask, original_size)]
-
-                save_dir = header.dir_save
+                # Save
+                save_dir = header.dir_save + '/output_inference_segmentation_endtoend' + str(test_network_name) + header.Whole_Catheter + "/" + 'second_output_90/'+ str(header.test_secon_network_name)+'/patch'
+                dir_case_id = dir_case_id.replace('/PICC', '').replace('/Normal', '')
                 mydataset.create_folder(save_dir)
+
+                Image.fromarray(resized_mask * 255).convert('L').save(save_dir + dir_case_id + '_mask.jpg')
                 image_original = testset.get_original(i * header.num_batch_test + k)
-
-                # save mask/pre-processed image
-                if flag_save_PNG:
-                    save_dir = save_dir + '/output_inference_segmentation_endtoend' + str(test_network_name) + header.Whole_Catheter + "/" + 'second_output_90/'+ str(header.test_secon_network_name)+'/patch'
-
-                    dir_case_id = dir_case_id.replace('/PICC', '')
-                    dir_case_id = dir_case_id.replace('/Normal', '')
-                    mydataset.create_folder(save_dir)
-                    Image.fromarray(post_output[0]*255).convert('L').save(save_dir + dir_case_id + '_mask.jpg')
-                    Image.fromarray(image_original.astype('uint8')).convert('L').save(save_dir + dir_case_id + '_image.jpg')
+                Image.fromarray(image_original.astype('uint8')).convert('L').save(save_dir + dir_case_id + '_image.jpg')
 
     if original_remake:
         inp = header.original_dir
@@ -185,7 +238,7 @@ def Original_file_make(inp, patch_dir, oup):
         Count_img = np.ones((width, height), np.uint8)
 
         for patch_file in patchnames:
-            if file_form[0] in patch_file:
+            if patch_file.startswith(file_form[0] + '_'):
                 filevalue = patch_file.split('.')[0]
                 patch = np.asarray(np.array(Image.open(os.path.join(patch_dir, patch_file)).convert('L'), 'uint8'))
 
@@ -197,13 +250,13 @@ def Original_file_make(inp, patch_dir, oup):
                 Count_img[int(filevalue.split('_')[3]):int(filevalue.split('_')[5]),
                 int(filevalue.split('_')[2]):int(filevalue.split('_')[4])] += 1
 
-
         img = img / 255.0
 
-        img[img > 0.5] = 1
-        img[img <= 0.5] = 0
+        img[img > 0.95] = 1
+        img[img <= 0.95] = 0
 
         img = (img * 255).astype('uint8')
+
         Image.fromarray(img.astype('uint8')).convert('L').save(oup + files)
 
 
@@ -237,7 +290,7 @@ def third_data_make(inp, patch_dir, oup):
         Count_img = np.ones((width, height), np.uint8)
 
         for patch_file in patchnames:
-            if file_form[0] in patch_file:
+            if patch_file.startswith(file_form[0] + '_'):
                 filevalue = patch_file.split('.')[0]
                 patch = np.asarray(np.array(Image.open(os.path.join(patch_dir, patch_file)).convert('L'), 'uint8'))
 
@@ -251,13 +304,14 @@ def third_data_make(inp, patch_dir, oup):
 
         img = img / 255.0
 
-        img[img > 0.5] = 1
-        img[img <= 0.5] = 0
+        img[img > 0.95] = 1
+        img[img <= 0.95] = 0
 
         img = (img * 255).astype('uint8')
 
-        Image.fromarray(img.astype('uint8')).convert('L').save(oup1 + files) ### im instead of img ###
+        Image.fromarray(img.astype('uint8')).convert('L').save(oup1 + files)
         Image.fromarray(img.astype('uint8')).convert('L').save(oup2 + files)
+
 
 def get_JI(pred_m, gt_m):
 

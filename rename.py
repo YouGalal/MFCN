@@ -21,4 +21,4 @@ for idx, (img, msk) in enumerate(zip(image_files, mask_files), 1):
 
     print(f"Renamed: {img} -> {new_name} | {msk} -> {new_mask}")
 
-print("✅ All files renamed successfully.")
+print("All files renamed successfully.")
