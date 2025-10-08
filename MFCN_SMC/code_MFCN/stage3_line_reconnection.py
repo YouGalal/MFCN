@@ -160,6 +160,7 @@ def main():
                 # get size and case id
                 original_size, dir_case_id, dir_results = mydataset.get_size_id(k, data['im_size'], data['ids'],
                                                                                 header.net_label[1:])
+                # dir_case_id = dir_case_id.replace('\\', '/') ### if on windows system uncomment this line
                 # post processing
                 post_output = [post_processing(outputs_max[k][j].cpu().numpy(), original_size) for j in
                                range(1, header.num_masks)]  # exclude background
@@ -191,7 +192,7 @@ def main():
         connected_component(save_dir, oup)
         print("connected component process complete")
 
-        make_correlation_check(oup)
+        make_correlation_check(oup) ### comment out if no gt masks available
 
 def connected_component(inp, oup):
     import os.path
