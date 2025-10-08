@@ -6,4 +6,4 @@ If you want to use this repository in a practical setting, as in uploading your 
 - delete folder "/MFCN/MFCN_SMC/output
 - in "stage1_conventional_model.py" uncomment these lines: line 124, line 132
 - in "stage2_patch_wise.py" comment out this line: line 204
-- in "stage3_line_reconnection.py" comment out these lines: line 195
+- in "stage3_line_reconnection.py" comment out this line: line 195
