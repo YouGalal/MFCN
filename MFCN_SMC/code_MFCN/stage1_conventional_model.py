@@ -61,7 +61,7 @@ def main():
             net = nn.DataParallel(net)
 #FCDenseNet U_Net R2U_Net AttU_Net R2AttU_Net
     # Load model
-    model_dir = header.dir_checkpoint + "FCDenseNet_epoch35.pth" # + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png ################################################## modified ##################################
+    model_dir = header.dir_checkpoint + "FCDenseNet_epoch47.pth" # + 'model__RANZCR_100_Whole_100_1024v9.1.pth' # -> whole png ################################################## modified ##################################
 
     print(model_dir)
     if os.path.isfile(model_dir):
@@ -121,7 +121,7 @@ def main():
                 # post processing
                 post_output = [post_processing(outputs_max[k][j].cpu().numpy(), original_size) for j in
                                range(1, header.num_masks)]  # exclude background
-
+                # ''' comment out if no gt masks available
                 post_output_mask = [post_processing(data['masks'][k][j].cpu().numpy(), original_size) for j in
                                     range(0, header.num_masks - 1)]  # exclude background
 
@@ -129,7 +129,7 @@ def main():
                 if flag_eval_JI:
                     ji = tuple(get_JI(post_output[j], post_output_mask[j]) for j in range(len(post_output)))
                     ji_test.append(ji)
-                # '''
+                # ''' comment out if no gt masks available
 
                 # original image processing
                 save_dir = header.dir_save # dir_save = "../output/"
