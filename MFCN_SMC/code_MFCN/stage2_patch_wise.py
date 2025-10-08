@@ -201,7 +201,7 @@ def main():
 
 
         Original_file_make(inp, patch_dir, oup)
-        make_correlation_check(oup)
+        make_correlation_check(oup) ### comment out if no gt masks available
         print("correlation finish")
 
     if third_data:
