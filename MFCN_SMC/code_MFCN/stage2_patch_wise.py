@@ -119,7 +119,7 @@ def main():
 
 
     # Model initialization
-    net = header.net
+    net = header.net1
     print(str(header.test_secon_network_name), "inference")
 
 

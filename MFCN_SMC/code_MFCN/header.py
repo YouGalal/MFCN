@@ -44,11 +44,13 @@ original_dir = dir_data_root + "input_Catheter"+Data_path+"/test/PICC"
 
 # Network
 num_masks = 2
+num_masks1 = 1 ### for stage 2
 num_network = 1
 
 test_secon_network_name = "FCDenseNet"
 test_third_network_name = "FCDenseNet"
 net = model.FCDenseNet(num_channel, num_masks)
+net1 = model.FCDenseNet(num_channel, num_masks1) ### for stage 2
 #net = model.FCDenseNet(num_channel, num_masks, ratio_dropout)
 net_label = ['BG', 'Catheter']
 

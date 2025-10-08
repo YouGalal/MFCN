@@ -68,7 +68,7 @@ def main():
 
     ### training ###
 
-    net = model.FCDenseNet(header.num_channel, header.num_masks).to(device)
+    net = model.FCDenseNet(header.num_channel, header.num_masks1).to(device)
     if torch.cuda.device_count() > 1:
         net = nn.DataParallel(net)
 
