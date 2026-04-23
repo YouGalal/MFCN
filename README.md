@@ -9,15 +9,11 @@ If you want to use this repository in a practical setting, as in uploading your 
 - in "stage3_line_reconnection.py" comment out this line: line 195
 
 <img width="841" height="838" src="https://github.com/user-attachments/assets/35afe4d5-2ef7-46ba-9069-fbafc3b74282" />
-
 <br><br>
-
 <img width="1152" height="570" src="https://github.com/user-attachments/assets/e798ec71-7eca-4cf2-9f6e-ee59a6623a26" />
-
 <br><br>
-
 <img width="1468" height="686" src="https://github.com/user-attachments/assets/af2900ce-33bc-4000-aba7-26f3d885daff" />
-
 <br><br>
-
-<img width="899" height="855" src="https://github.com/user-attachments/assets/c4d486bd-354e-4ac2-bd34-7a6a7f48ce84" />
+<img width="1445" height="596" alt="Screenshot 2026-04-23 120751" src="https://github.com/user-attachments/assets/118d31b0-e4c5-4e5a-8276-503c41f17d11" />
+<br><br>
+<img width="933" height="938" alt="Screenshot 2026-04-23 121211" src="https://github.com/user-attachments/assets/a402e61f-8783-4f68-99cb-9053ed48ec72" />
