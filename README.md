@@ -8,7 +8,7 @@ If you want to use this repository in a practical setting, as in uploading your 
 - in "stage2_patch_wise.py" comment out this line: line 204
 - in "stage3_line_reconnection.py" comment out this line: line 195
 
-<div style="display: flex; flex-direction: column; gap: 20px;">
+<div style="display: flex; flex-direction: column; gap: 60px;">
   <img width="841" height="838" src="https://github.com/user-attachments/assets/35afe4d5-2ef7-46ba-9069-fbafc3b74282" />
   <img width="1152" height="570" src="https://github.com/user-attachments/assets/e798ec71-7eca-4cf2-9f6e-ee59a6623a26" />
   <img width="1468" height="686" src="https://github.com/user-attachments/assets/af2900ce-33bc-4000-aba7-26f3d885daff" />
